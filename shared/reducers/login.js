@@ -45,7 +45,8 @@ type LoginState = {
     name: string,
     id: string,
     type: 'mobile' | 'laptop'
-  }>
+  }>,
+  waitingForResponse: boolean
 }
 
 const initialState: LoginState = {
@@ -90,7 +91,8 @@ const initialState: LoginState = {
     {name: 'mob2', id: '2', type: 'mobile'},
     {name: 'mob2', id: '2', type: 'mobile'},
     {name: 'mob2', id: '2', type: 'mobile'}
-  ]
+  ],
+  waitingForResponse: false
 }
 
 export default function (state: LoginState = initialState, action: any): LoginState {
@@ -172,6 +174,9 @@ export default function (state: LoginState = initialState, action: any): LoginSt
       } else {
         toMerge = {configuredAccounts: action.payload.accounts}
       }
+      break
+    case Constants.waitingForResponse:
+      toMerge = {waitingForResponse: action.payload}
       break
     default:
       return state
