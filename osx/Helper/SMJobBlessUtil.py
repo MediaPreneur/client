@@ -201,7 +201,7 @@ def checkStep1(appPath):
 
     # Check that we have at least one tool.
 
-    if len(toolPathList) == 0:
+    if not toolPathList:
         raise CheckException("no tools found", toolDirPath)
 
     return toolPathList
@@ -211,7 +211,7 @@ def checkStep2(appPath, toolPathList):
 
     # Create a map from the tool name (not path) to its designated requirement.
 
-    toolNameToReqMap = dict()
+    toolNameToReqMap = {}
     for toolPath in toolPathList:
         req = readDesignatedRequirement(toolPath, "tool")
         toolNameToReqMap[os.path.basename(toolPath)] = req
@@ -374,7 +374,7 @@ def setreq(appPath, appInfoPlistPath, toolInfoPlistPaths):
     if needsUpdate:
         appInfo["SMPrivilegedExecutables"] = appToolDict
         plistlib.writePlist(appInfo, appInfoPlistPath)
-        print >> sys.stdout, "%s: updated" % appInfoPlistPath
+        (print >> sys.stdout, f"{appInfoPlistPath}: updated")
 
     # Set the SMAuthorizedClients value in each tool's "Info.plist".
 
@@ -393,7 +393,7 @@ def setreq(appPath, appInfoPlistPath, toolInfoPlistPaths):
         if needsUpdate:
             toolInfo["SMAuthorizedClients"] = toolAppListSorted
             plistlib.writePlist(toolInfo, toolInfoPlistPath)
-            print >> sys.stdout, "%s: updated" % toolInfoPlistPath
+            (print >> sys.stdout, f"{toolInfoPlistPath}: updated")
 
 def main():
     options, appArgs = getopt.getopt(sys.argv[1:], "d")
@@ -408,14 +408,17 @@ def main():
     if len(appArgs) == 0:
         raise UsageException()
     command = appArgs[0]
-    if command == "check":
-        if len(appArgs) != 2:
-            raise UsageException()
-        check(appArgs[1])
-    elif command == "setreq":
-        if len(appArgs) < 4:
-            raise UsageException()
+    if (
+        command != "check"
+        and command == "setreq"
+        and len(appArgs) < 4
+        or command not in ["check", "setreq"]
+    ):
+        raise UsageException()
+    elif command != "check":
         setreq(appArgs[1], appArgs[2], appArgs[3:])
+    elif len(appArgs) == 2:
+        check(appArgs[1])
     else:
         raise UsageException()
 
